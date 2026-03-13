@@ -7,7 +7,7 @@
 
 ## What Is This?
 
-I built ZAI World Model because I wanted to understand why markets crash — not just when they crash, but what conditions always seem to come before them.
+I built ZAI World Data Model because I wanted to understand why markets crash — not just when they crash, but what conditions always seem to come before them.
 
 The idea: if you download 125+ years of global financial data and find the hidden connections between markets, you can compare today's conditions to every historical crash and see which one it most resembles.
 
