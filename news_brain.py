@@ -121,9 +121,14 @@ def fetch_rss(url, timeout=10):
             # Description
             desc = (item.findtext("description") or
                    item.findtext("{http://www.w3.org/2005/Atom}summary") or "")
-            # Link
-            link = (item.findtext("link") or
-                   item.findtext("{http://www.w3.org/2005/Atom}link") or "")
+            # Link. RSS keeps the url in the element text, Atom puts it in the
+            # href attribute of a self-closing <link/>, so findtext came back
+            # empty for every atom feed and those articles had no link.
+            link = item.findtext("link") or ""
+            if not link:
+                atom_link = item.find("{http://www.w3.org/2005/Atom}link")
+                if atom_link is not None:
+                    link = atom_link.get("href") or (atom_link.text or "")
             # Date
             pub_date = (item.findtext("pubDate") or
                        item.findtext("{http://www.w3.org/2005/Atom}updated") or "")
