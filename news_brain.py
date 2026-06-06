@@ -486,7 +486,14 @@ def display_news_analysis(triggered, historical_matches, ai_analysis, articles):
         theme = ai_analysis.get("dominant_theme", "N/A")
         hist = ai_analysis.get("historical_parallel", "N/A")
         summary = ai_analysis.get("research_summary", "")
-        conf = ai_analysis.get("confidence", 0)
+        # confidence comes straight from the model, which ignores the 0-100 hint
+        # and sometimes returns a float (72.5) or a string. raw conf//10 then
+        # blows up the bar with str*float, and that crash lands before the
+        # caller's save step, throwing away an analysis we already paid for.
+        try:
+            conf = max(0, min(100, int(float(ai_analysis.get("confidence", 0) or 0))))
+        except (TypeError, ValueError):
+            conf = 0
 
         risk_icon = {"LOW": "🟢", "MEDIUM": "🟡", "HIGH": "🟠", "CRITICAL": "🔴"}.get(risk, "⚪")
         print(f"  Risk Level:  {risk_icon} {risk}")
