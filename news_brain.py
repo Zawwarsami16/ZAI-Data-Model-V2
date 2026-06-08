@@ -7,6 +7,7 @@ By Zawwar (Zawwarsami16)
 """
 
 import os
+import re
 import json
 import time
 import requests
@@ -176,6 +177,18 @@ def fetch_all_news(feeds=None, max_feeds=15):
 # ============================================================
 # KEYWORD ANALYZER
 # ============================================================
+def _keyword_hit(keyword, text):
+    # short keywords like "sec"/"war"/"oil"/"fed"/"nato" were matched as bare
+    # substrings, so "second"/"toward"/"turmoil" lit up crypto/war/oil and the
+    # article got filed under a market it never mentioned. match those as whole
+    # words (optional plural). long words and multi-word phrases keep substring
+    # matching so inflections like "cryptocurrency"/"regulations" still hit and
+    # phrases don't false-positive anyway.
+    if " " not in keyword and len(keyword) < 6:
+        return re.search(rf"\b{re.escape(keyword)}s?\b", text) is not None
+    return keyword in text
+
+
 def analyze_articles(articles):
     """Articles mein market-relevant keywords dhundo"""
     triggered = {}
@@ -185,7 +198,7 @@ def analyze_articles(articles):
 
         for category, info in MARKET_IMPACT_MAP.items():
             for keyword in info["keywords"]:
-                if keyword in text:
+                if _keyword_hit(keyword, text):
                     if category not in triggered:
                         triggered[category] = {
                             "articles": [],
